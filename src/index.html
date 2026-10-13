@@ -1,0 +1,329 @@
+<title>Paternoster Records</title>
+<meta name="description" content="Paternoster: a Prague record shop on a lift that never stops.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=IBM+Plex+Mono:wght@400;500&family=Newsreader:ital,wght@1,300..500&display=swap">
+<!-- @css -->
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="loop" viewBox="0 0 28 44">
+    <path d="M3 14 A11 11 0 0 1 25 14 L25 30 A11 11 0 0 1 3 30 Z" fill="none" stroke="currentColor" stroke-width="4"/>
+  </symbol>
+</svg>
+
+<a class="skip" href="#f1">Skip to the records</a>
+
+<!-- LOADER -->
+<div class="loader" id="loader" aria-hidden="true">
+  <svg class="mark mark--big" viewBox="0 0 28 44"><use href="#loop"/><rect class="cab-a" width="8" height="9" rx="1"/><rect class="cab-b" width="8" height="9" rx="1"/></svg>
+  <p class="loader-floor" id="loaderFloor">5</p>
+  <p class="loader-line mono">Calling the lift</p>
+</div>
+
+<!-- HUD -->
+<header class="hud" id="hud">
+  <a class="brand" href="#p" data-floor-link="P" aria-label="Paternoster, back to the ground floor">
+    <svg class="mark" viewBox="0 0 28 44" aria-hidden="true"><use href="#loop"/><rect class="cab-a" width="8" height="9" rx="1"/><rect class="cab-b" width="8" height="9" rx="1"/></svg>
+    <span class="brand-word">Paternoster</span>
+  </a>
+  <button class="hud-floor" id="hudFloor" type="button" aria-haspopup="dialog" aria-controls="directory" aria-label="Floor directory">
+    <span class="plate plate--sm"><span class="hud-num" id="hudNum">P</span></span>
+    <span class="hud-name mono" id="hudName">Ground</span>
+  </button>
+  <nav class="hud-right" aria-label="Shop">
+    <button class="pill-btn" id="soundBtn" type="button" aria-pressed="false" aria-label="Turn sound on"><span class="led" aria-hidden="true"></span><span class="mono">Sound</span></button>
+    <button class="pill-btn" id="holdBtn" type="button" aria-haspopup="dialog" aria-controls="docket"><span class="mono">Held</span><span class="count mono" id="holdCount">0</span></button>
+    <button class="pill-btn pill-btn--menu" id="floorsBtn" type="button" aria-haspopup="dialog" aria-controls="directory"><span class="mono">Floors</span><span class="burger" aria-hidden="true"><i></i><i></i></span></button>
+  </nav>
+</header>
+
+<!-- FLOOR DIRECTORY -->
+<div class="directory" id="directory" role="dialog" aria-modal="true" aria-labelledby="dirTitle" hidden>
+  <div class="dir-board">
+    <div class="dir-head">
+      <h2 id="dirTitle">Floors</h2>
+      <button class="round-btn" type="button" id="dirClose" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <ol class="dir-list" id="dirList">
+      <li><a href="#f5" data-floor-link="5"><span class="plate plate--md"><b>5</b></span><span class="dir-name">Visit</span><span class="dir-desc">Address, hours, post</span><span class="dir-btn" aria-hidden="true"></span></a></li>
+      <li><a href="#f4" data-floor-link="4"><span class="plate plate--md"><b>4</b></span><span class="dir-name">Cabin 7</span><span class="dir-desc">Concerts in the lift</span><span class="dir-btn" aria-hidden="true"></span></a></li>
+      <li><a href="#f3" data-floor-link="3"><span class="plate plate--md"><b>3</b></span><span class="dir-name">The lap</span><span class="dir-desc">3 min 52 around the building</span><span class="dir-btn" aria-hidden="true"></span></a></li>
+      <li><a href="#f2" data-floor-link="2"><span class="plate plate--md"><b>2</b></span><span class="dir-name">Second-hand</span><span class="dir-desc">The crates</span><span class="dir-btn" aria-hidden="true"></span></a></li>
+      <li><a href="#f1" data-floor-link="1"><span class="plate plate--md"><b>1</b></span><span class="dir-name">New in</span><span class="dir-desc">This week’s records</span><span class="dir-btn" aria-hidden="true"></span></a></li>
+      <li><a href="#p" data-floor-link="P"><span class="plate plate--md"><b>P</b></span><span class="dir-name">Ground</span><span class="dir-desc">Step on here</span><span class="dir-btn" aria-hidden="true"></span></a></li>
+    </ol>
+    <p class="dir-foot mono">Tip: press P or 1–5 anywhere.</p>
+  </div>
+</div>
+
+<main id="main">
+
+<!-- P -->
+<section class="floor floor-p" id="p" data-floor="P" data-tone="blue">
+  <h1 class="wordmark" id="wordmark"><span class="sr">Paternoster, a record shop in Prague</span><span class="wm" aria-hidden="true">Paternoster</span></h1>
+  <div class="p-grid">
+    <div class="p-copy">
+      <p class="p-thesis">Everything comes back around.</p>
+      <p class="p-lede">A record shop on a lift that never stops.</p>
+      <p class="status mono" id="status"><span class="status-dot"></span><span id="statusText">Open</span></p>
+      <div class="p-plate">
+        <span class="plate plate--house"><b>17</b></span>
+        <span class="mono">Jindřišská 17<br>Prague 1</span>
+      </div>
+    </div>
+    <div class="landing" id="landing">
+      <div class="door">
+        <p class="door-sign mono"><span aria-hidden="true">▲</span> Up</p>
+        <div class="shaft" id="shaftUp" data-chip="Step off"></div>
+      </div>
+      <div class="pier">
+        <button class="stop" id="stopBtn" type="button" aria-pressed="false" aria-label="Stop the lift">
+          <span class="stop-ring"><span class="stop-cap"></span></span>
+          <span class="stop-label mono" id="stopLabel">Stop</span>
+        </button>
+      </div>
+      <div class="door">
+        <p class="door-sign mono"><span aria-hidden="true">▼</span> Down</p>
+        <div class="shaft" id="shaftDown" data-chip="Step off"></div>
+      </div>
+      <div class="readout mono" id="readout">
+        <button class="ro" type="button"><span class="ro-text">—</span></button>
+        <button class="ro" type="button"><span class="ro-text">—</span></button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="slab"><span class="slab-num">1</span><span class="slab-rule"></span><span class="slab-lv mono">+4.20 m</span></div>
+
+<!-- 1 -->
+<section class="floor floor-1" id="f1" data-floor="1" data-tone="white">
+  <header class="fhead">
+    <span class="plate plate--floor"><b>1</b></span>
+    <div>
+      <h2 class="ftitle">New in</h2>
+      <p class="flede">Twelve records this week, one per cabin.</p>
+    </div>
+  </header>
+  <div class="f1-body">
+    <div class="f1-call" aria-hidden="true">
+      <div class="door door--call"><div class="shaft shaft--call" id="callShaft" data-chip="Step in"><div class="call-strip" id="callStrip"></div></div></div>
+      <p class="call-cap mono"><span class="call-arrow" id="callArrow">■</span> Cabin <span id="callNo">01</span></p>
+    </div>
+    <div class="f1-sheet">
+      <div class="f1-tools">
+        <div class="filters" role="group" aria-label="Filter" id="filters">
+          <button type="button" class="chipbtn is-on" data-filter="all" aria-pressed="true">All</button>
+          <button type="button" class="chipbtn" data-filter="elektronika" aria-pressed="false">Electronic</button>
+          <button type="button" class="chipbtn" data-filter="jazz" aria-pressed="false">Jazz</button>
+          <button type="button" class="chipbtn" data-filter="kytary" aria-pressed="false">Guitars</button>
+          <button type="button" class="chipbtn" data-filter="klid" aria-pressed="false">Quiet</button>
+          <button type="button" class="chipbtn" data-filter="edice" aria-pressed="false">Our label</button>
+        </div>
+        <div class="sort mono" role="group" aria-label="Sort">
+          <button type="button" class="sbtn is-on" data-sort="cabin" aria-pressed="true">Cabin</button>
+          <button type="button" class="sbtn" data-sort="price" aria-pressed="false">Price</button>
+          <button type="button" class="sbtn" data-sort="year" aria-pressed="false">Year</button>
+        </div>
+      </div>
+      <ol class="inv" id="inv" aria-label="New records"></ol>
+    </div>
+  </div>
+</section>
+
+<div class="slab"><span class="slab-num">2</span><span class="slab-rule"></span><span class="slab-lv mono">+8.40 m</span></div>
+
+<!-- 2 -->
+<section class="floor floor-2" id="f2" data-floor="2" data-tone="blue">
+  <header class="fhead">
+    <span class="plate plate--floor plate--inv"><b>2</b></span>
+    <div>
+      <h2 class="ftitle">Second-hand</h2>
+      <p class="flede">Cleaned, play-tested, graded. Drag the crate to dig.</p>
+    </div>
+  </header>
+  <div class="bazar">
+    <div class="crate-wrap">
+      <div class="tabs" id="crateTabs" role="group" aria-label="Sections"></div>
+      <div class="crate" id="crate" tabindex="0" role="group" aria-roledescription="record crate" aria-label="Record crate. Use the arrow keys to flip." data-chip="Drag to flip">
+        <div class="crate-stack" id="stack"></div>
+        <div class="crate-front"><svg class="mark" viewBox="0 0 28 44" aria-hidden="true"><use href="#loop"/></svg><span class="crate-word">Paternoster</span></div>
+      </div>
+      <div class="crate-ctrl">
+        <button type="button" class="round-btn" id="cratePrev" aria-label="Previous record">↑</button>
+        <p class="crate-count mono" aria-live="polite"><span id="crateNow">01</span> / <span id="crateAll">24</span></p>
+        <button type="button" class="round-btn" id="crateNext" aria-label="Next record">↓</button>
+      </div>
+    </div>
+    <article class="bz" id="bz"></article>
+  </div>
+  <p class="strip mono">We buy records. Bring them to the cellar door, Tue–Sat, 12–18.</p>
+</section>
+
+<div class="slab"><span class="slab-num">3</span><span class="slab-rule"></span><span class="slab-lv mono">+12.60 m</span></div>
+
+<!-- 3 -->
+<section class="floor floor-3" id="f3" data-floor="3" data-tone="white">
+  <header class="fhead">
+    <span class="plate plate--floor"><b>3</b></span>
+    <div>
+      <h2 class="ftitle">The lap</h2>
+      <p class="flede">One full loop of the building. Scroll to ride it.</p>
+    </div>
+  </header>
+  <div class="lap" id="lap">
+    <div class="lap-inner">
+      <svg class="lap-draw" id="lapDraw" viewBox="0 0 260 600" role="img" aria-label="Section drawing of the building with the lift loop"></svg>
+      <div class="lap-read">
+        <p class="lap-time" id="lapTime" aria-hidden="true">0:00</p>
+        <p class="lap-where mono" id="lapWhere">Ground · up</p>
+        <p class="lap-text" id="lapText">Step on. Mind the gap.</p>
+      </div>
+    </div>
+  </div>
+  <dl class="facts">
+    <div><dt class="mono">First lap</dt><dd>1931</dd></div>
+    <div><dt class="mono">Cabins</dt><dd>14</dd></div>
+    <div><dt class="mono">Speed</dt><dd>0.3<small>m/s</small></dd></div>
+    <div><dt class="mono">In the cellar</dt><dd>38k</dd></div>
+  </dl>
+</section>
+
+<div class="slab"><span class="slab-num">4</span><span class="slab-rule"></span><span class="slab-lv mono">+16.80 m</span></div>
+
+<!-- 4 -->
+<section class="floor floor-4" id="f4" data-floor="4" data-tone="ink">
+  <header class="fhead">
+    <span class="plate plate--floor plate--red"><b>4</b></span>
+    <div>
+      <h2 class="ftitle">Cabin 7</h2>
+      <p class="flede">Concerts inside the lift. Two listeners per lap.</p>
+    </div>
+  </header>
+  <div class="sessions">
+    <div class="mini" aria-hidden="true"><div class="mini-shaft" id="miniShaft"></div></div>
+    <div class="log">
+      <ol class="log-rows" id="logRows"></ol>
+    </div>
+  </div>
+</section>
+
+<div class="slab"><span class="slab-num">5</span><span class="slab-rule"></span><span class="slab-lv mono">+21.00 m</span></div>
+
+<!-- 5 -->
+<section class="floor floor-5" id="f5" data-floor="5" data-tone="blue">
+  <header class="fhead">
+    <span class="plate plate--floor plate--inv"><b>5</b></span>
+    <div>
+      <h2 class="ftitle">Visit</h2>
+      <p class="flede">Tram to Jindřišská. Through the passage. You can’t miss the lift.</p>
+    </div>
+  </header>
+  <div class="machine">
+    <div class="visit">
+      <div class="v-block">
+        <h3 class="mono">Address</h3>
+        <p class="v-addr" id="addr">Palác Elektra<br>Jindřišská 17<br>Prague 1</p>
+        <button type="button" class="copy mono" data-copy="Palác Elektra, Jindřišská 17, 110 00 Prague 1">Copy address</button>
+      </div>
+      <div class="v-block">
+        <h3 class="mono">Hours</h3>
+        <table class="hours mono" id="hours"><tbody></tbody></table>
+      </div>
+      <div class="v-block">
+        <h3 class="mono">Contact</h3>
+        <p class="v-contact"><span class="sel">hello@paternoster.records</span> <button type="button" class="copy mono" data-copy="hello@paternoster.records">Copy</button></p>
+      </div>
+      <form class="post" id="postForm" novalidate>
+        <label for="postEmail" class="mono">One email a month. No offers.</label>
+        <div class="post-row">
+          <input id="postEmail" name="email" type="email" autocomplete="email" placeholder="you@example.com" required>
+          <button type="submit" class="mono">Subscribe</button>
+        </div>
+        <p class="post-msg mono" id="postMsg" role="status"></p>
+      </form>
+    </div>
+    <figure class="wheel"><canvas id="wheel" width="800" height="800" aria-hidden="true"></canvas><figcaption class="mono">Top wheel, 1931</figcaption></figure>
+  </div>
+  <footer class="foot">
+    <p class="foot-mark" aria-hidden="true"><span>Paternoster</span></p>
+    <p class="mono foot-line">A fictional shop. Every artist and record is invented. Portfolio concept, 2026.</p>
+  </footer>
+</section>
+
+<!-- OVER THE TOP -->
+<section class="over" id="over" aria-label="Over the top">
+  <div class="over-inner">
+    <svg class="over-arc" viewBox="0 0 600 320" aria-hidden="true">
+      <path class="oa-track" d="M80 300 L80 170 A220 220 0 0 1 520 170 L520 300"/>
+      <path class="oa-fill" id="oaFill" d="M80 300 L80 170 A220 220 0 0 1 520 170 L520 300"/>
+      <g id="oaCab"><rect x="-20" y="-28" width="40" height="56" rx="3"/></g>
+    </svg>
+    <p class="over-h">Keep riding.</p>
+    <p class="over-p mono"><span id="overPct">0</span>% over the top</p>
+  </div>
+</section>
+
+</main>
+
+<!-- RECORD VIEW -->
+<div class="cv" id="cv" role="dialog" aria-modal="true" aria-labelledby="cvArtist" hidden>
+  <div class="cv-bg" aria-hidden="true"><span class="cv-lamp"></span><span class="cv-floor"></span></div>
+  <div class="cv-scroll">
+    <div class="cv-grid">
+      <div class="cv-media">
+        <div class="cv-disc" id="cvDisc" data-chip="Pull">
+          <div class="cv-grooves"></div>
+          <div class="cv-label" id="cvLabel"><span class="cv-lb-top mono" id="cvLabelTop"></span><span class="cv-lb-hole"></span><span class="cv-lb-bot mono" id="cvLabelBot"></span></div>
+          <svg class="cv-ring" viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="47"/><circle class="cv-ring-p" id="cvRing" cx="50" cy="50" r="47"/></svg>
+        </div>
+        <div class="cv-sleeve" id="cvSleeve"><img id="cvCover" alt=""><span class="cv-sheen"></span><span class="sticker cv-sticker" id="cvSticker" hidden></span></div>
+      </div>
+      <div class="cv-info">
+        <p class="mono cv-kicker" id="cvKicker"></p>
+        <h2 class="cv-h"><span class="cv-artist" id="cvArtist"></span><span class="cv-title" id="cvTitle"></span></h2>
+        <div class="cv-actions">
+          <button type="button" class="cv-play" id="cvPlay" aria-pressed="false"><span class="cv-play-ico" aria-hidden="true"></span><span class="mono" id="cvPlayTx">Listen</span><span class="cv-rpm mono">33⅓</span></button>
+          <button type="button" class="cv-hold" id="cvHold" aria-pressed="false"><span class="mono" id="cvHoldTx">Hold</span><span class="cv-price" id="cvPrice"></span></button>
+        </div>
+        <p class="cv-note" id="cvNote"></p>
+        <dl class="cv-meta mono" id="cvMeta"></dl>
+        <ol class="cv-tracks mono" id="cvTracks"></ol>
+      </div>
+    </div>
+  </div>
+  <nav class="cv-nav mono" aria-label="Record navigation">
+    <button type="button" id="cvPrev" aria-label="Previous record">←</button>
+    <button type="button" id="cvClose" class="cv-close">Back on <span aria-hidden="true">×</span></button>
+    <button type="button" id="cvNext" aria-label="Next record">→</button>
+  </nav>
+</div>
+
+<!-- DOCKET -->
+<div class="docket" id="docket" role="dialog" aria-modal="true" aria-labelledby="dkTitle" hidden>
+  <div class="dk-paper">
+    <div class="dk-head">
+      <h2 id="dkTitle">On hold</h2>
+      <button type="button" class="round-btn" id="dkClose" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <ol class="dk-list mono" id="dkList"></ol>
+    <p class="dk-empty" id="dkEmpty">Nothing yet. We keep records at the till for 48 hours.</p>
+    <div class="dk-total mono" id="dkTotal"></div>
+    <form class="dk-form" id="dkForm" novalidate>
+      <label for="dkName" class="mono">Name for the till</label>
+      <div class="dk-row"><input id="dkName" name="name" type="text" autocomplete="name" placeholder="Jana N." required><button type="submit" class="mono">Confirm</button></div>
+      <p class="dk-msg mono" id="dkMsg" role="status"></p>
+    </form>
+    <div class="dk-stamp" id="dkStamp" aria-hidden="true"><span>Held</span><small id="dkStampNo">No. 0417</small></div>
+  </div>
+</div>
+
+<div class="travel" id="travel" aria-hidden="true"><div class="travel-slab"><span class="plate plate--travel"><b id="travelNum">1</b></span></div></div>
+<div class="toast mono" id="toast" role="status" aria-live="polite"></div>
+<div class="chip mono" id="chip" aria-hidden="true"></div>
+<div class="grain" aria-hidden="true"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://unpkg.com/lenis@1.1.13/dist/lenis.min.js"></script>
+<!-- @js -->
