@@ -11,13 +11,22 @@
 ## The site is the building
 - Each section is a floor, separated by a concrete slab marked with its height in metres.
 - The header plate shows the current floor. Press P or 1–5 to ride to that floor.
-- The hero has two lift doors with fourteen cabins on one continuous loop. You can drag the cabins, and STOP pauses all motion.
+- **The landing (WebGL):** a real 3D shaft behind the blue enamel wall, with fourteen glowing oak cabins on one continuous loop, each carrying its record. Click a cabin to step off with it. Scrolling flies the camera in and up through the concrete slab, and the screen goes black exactly where the next section begins.
+- **Entry:** choose "Enter with sound" or "Enter quietly". The camera then drops down through the floors and arrives at the landing.
+- **Lift display:** an amber 5×7 dot-matrix ticker, with accents, listing what is riding now. It speeds up as you scroll.
+- STOP pauses all motion.
 - **New in:** hover a record and its cabin is called to the landing.
 - **Second-hand:** drag to flip through a 3D crate. Records are graded M to G.
 - **The lap:** a 3:52 ride around the building, driven by scroll.
 - **Cabin 7:** concerts in the lift, booked by the lap.
 - **Visit:** the address, hours and the top wheel.
 - **Over the top:** scrolling past the end loops you back to the ground floor.
+
+## Details
+- Custom cursor with labels and magnetic buttons.
+- Headlines build letter by letter, and the numbers count up.
+- A floor rail runs with the ground floor at the bottom, like the building.
+- The footer letters ride up and down like cabins.
 
 ## Craft
 Every sleeve is generated in code, and every sound is synthesised. Only transform and opacity are animated. Reduced motion starts the site with the lift stopped.

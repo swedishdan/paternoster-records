@@ -50,7 +50,7 @@
   const FLOORS = ['P', '1', '2', '3', '4', '5'];
   const FLOOR_EL = { P: '#p', 1: '#f1', 2: '#f2', 3: '#f3', 4: '#f4', 5: '#f5' };
   const FLOOR_NAME = { P: 'Ground', 1: 'New in', 2: 'Second-hand', 3: 'The lap', 4: 'Cabin 7', 5: 'Visit' };
-  const TONE = { blue: ['var(--blue)', 'var(--white)'], white: ['var(--white)', 'var(--ink)'], ink: ['var(--ink)', 'var(--white)'] };
+  const TONE = { blue: ['var(--blue)', 'var(--white)', 'var(--blue)'], white: ['var(--white)', 'var(--ink)', 'var(--white)'], ink: ['var(--ink)', 'var(--white)', 'var(--ink)'], clear: ['rgba(10,16,40,0)', 'var(--white)', 'var(--blue)'] };
 
   /* ---------- Prague time ---------- */
   function prague() {
@@ -141,16 +141,37 @@
   /* ---------- toast & cursor chip ---------- */
   const toastEl = $('#toast'); let toastT = 0;
   function toast(msg, ms) { toastEl.textContent = msg; toastEl.classList.add('is-on'); clearTimeout(toastT); toastT = setTimeout(() => toastEl.classList.remove('is-on'), ms || 2600); }
+  const cursorEl = $('#cursor'), cursorText = document.createElement('span'); $('#cursorLabel').appendChild(cursorText);
+  const cur = { x: -100, y: -100, rx: -100, ry: -100, lx: -100, ly: -100, label: '' };
+  let sceneHover = false;
+  function cursorLabel(l) { if (l === cur.label) return; cur.label = l; if (l) cursorText.textContent = l; cursorEl.classList.toggle('is-label', !!l); }
   if (fine) {
-    const chip = $('#chip'), lab = document.createElement('span'); chip.appendChild(lab);
-    let cx = -100, cy = -100, tx = -100, ty = -100, label = '';
-    window.addEventListener('pointermove', e => { tx = e.clientX; ty = e.clientY; }, { passive: true });
+    document.documentElement.classList.add('has-cursor');
+    const ring = $('.cursor-ring'), lab = $('#cursorLabel');
+    window.addEventListener('pointermove', e => { cur.x = e.clientX; cur.y = e.clientY; }, { passive: true });
     document.addEventListener('pointerover', e => {
-      const el = e.target.closest && e.target.closest('[data-chip]'); const l = el ? el.dataset.chip : '';
-      if (l !== label) { label = l; if (l) lab.textContent = l; chip.classList.toggle('is-on', !!l); }
+      const t = e.target; if (!t || !t.closest) return;
+      const chipEl = t.closest('[data-chip]');
+      if (!sceneHover) cursorLabel(chipEl ? chipEl.dataset.chip : '');
+      cursorEl.classList.toggle('is-link', !!t.closest('a, button, input, select, label, .crate, .shaft'));
     });
-    document.documentElement.addEventListener('mouseleave', () => { label = ''; chip.classList.remove('is-on'); });
-    gsap.ticker.add(() => { cx = lerp(cx, tx, .25); cy = lerp(cy, ty, .25); chip.style.transform = 'translate3d(' + cx.toFixed(1) + 'px,' + cy.toFixed(1) + 'px,0)'; });
+    window.addEventListener('pointerdown', () => cursorEl.classList.add('is-down'));
+    window.addEventListener('pointerup', () => cursorEl.classList.remove('is-down'));
+    document.documentElement.addEventListener('mouseleave', () => { cursorLabel(''); cur.x = cur.y = -100; });
+    gsap.ticker.add(() => {
+      cur.rx = lerp(cur.rx, cur.x, .2); cur.ry = lerp(cur.ry, cur.y, .2); cur.lx = lerp(cur.lx, cur.x, .14); cur.ly = lerp(cur.ly, cur.y, .14);
+      ring.style.transform = 'translate3d(' + cur.rx.toFixed(1) + 'px,' + cur.ry.toFixed(1) + 'px,0)';
+      lab.style.transform = 'translate3d(' + cur.lx.toFixed(1) + 'px,' + cur.ly.toFixed(1) + 'px,0)';
+    });
+  }
+  function magnetize(root) {
+    if (!fine || reduce || !gsap.quickTo) return;
+    $$('.pill-btn, .round-btn, .stop, .cv-play, .cv-hold, .pill, .enter, .chipbtn, .copy', root || document).forEach(el => {
+      if (el.dataset.mag) return; el.dataset.mag = '1';
+      const xTo = gsap.quickTo(el, 'x', { duration: .5, ease: 'power3.out' }), yTo = gsap.quickTo(el, 'y', { duration: .5, ease: 'power3.out' });
+      el.addEventListener('pointermove', e => { const b = el.getBoundingClientRect(); xTo((e.clientX - b.left - b.width / 2) * .3); yTo((e.clientY - b.top - b.height / 2) * .4); });
+      el.addEventListener('pointerleave', () => { xTo(0); yTo(0); });
+    });
   }
 
   /* ---------- live status ---------- */
@@ -357,7 +378,7 @@
      HUD, travel, directory
      ========================================================================== */
   const hud = $('#hud'); let floorNow = 'P', traveling = false;
-  function setTone(tone) { const t = TONE[tone] || TONE.blue; hud.style.setProperty('--hud-bg', t[0]); hud.style.setProperty('--hud-fg', t[1]); }
+  function setTone(tone) { const t = TONE[tone] || TONE.blue; hud.style.setProperty('--hud-bg', t[0]); hud.style.setProperty('--hud-fg', t[1]); hud.style.setProperty('--hud-plate', t[2]); }
   function setFloor(f, tone) {
     if (tone) setTone(tone);
     if (f === floorNow) return;
@@ -373,7 +394,7 @@
 
   function travelTo(f) {
     const target = $(FLOOR_EL[f]); if (!target) return;
-    const y = target.getBoundingClientRect().top + scrollY();
+    const y = f === 'P' ? 0 : target.getBoundingClientRect().top + scrollY();
     try { history.replaceState(null, '', f === 'P' ? location.pathname + location.search : '#' + target.id); } catch (e) { /* sandboxed */ }
     if (reduce || traveling) { jump(y); setFloor(f, target.dataset.tone); return; }
     const a = FLOORS.indexOf(floorNow), b = FLOORS.indexOf(f);
@@ -421,12 +442,13 @@
   directory.addEventListener('click', e => { if (e.target === directory) closeDirectory(); });
 
   const soundBtn = $('#soundBtn');
-  soundBtn.addEventListener('click', () => {
-    const on = !Sound.on; Sound.setOn(on);
+  function setSound(on, quiet) {
+    Sound.setOn(on);
     soundBtn.setAttribute('aria-pressed', on);
     soundBtn.setAttribute('aria-label', on ? 'Turn sound off' : 'Turn sound on');
-    if (on) { Sound.sfx.press(); toast('Sound on. You can hear the lift.'); }
-  });
+    if (on && !quiet) { Sound.sfx.press(); toast('Sound on. You can hear the lift.'); }
+  }
+  soundBtn.addEventListener('click', () => setSound(!Sound.on));
 
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape') { if (cv.open) closeCabin(); else if (!docket.hidden) closeDocket(); else if (!directory.hidden) closeDirectory(); return; }
@@ -472,10 +494,20 @@
     else toast('Empty cabin. Try the next one.');
   }
 
+  const LIFT_SLOTS = [];
+  for (let c = 1; c <= 14; c++) { const r = NEW.find(x => x.cabin === c); LIFT_SLOTS.push(r ? { type: 'rec', rec: r } : { type: c === 7 ? 'seven' : 'empty' }); }
+  const roBtns = $$('#readout .ro');
+  function setReadout(k, i) {
+    const btn = roBtns[k === 'up' ? 0 : 1], t = $('.ro-text', btn);
+    btn.dataset.slot = i; t.innerHTML = slotText(LIFT_SLOTS[i], k);
+    btn.setAttribute('aria-label', t.textContent);
+    if (!reduce) gsap.fromTo(t, { yPercent: k === 'up' ? 100 : -100 }, { yPercent: 0, duration: .5, ease: 'power3.out' });
+  }
+  roBtns.forEach(b => b.addEventListener('click', () => { const i = +b.dataset.slot; if (!isNaN(i)) slotAct(LIFT_SLOTS[i], null); }));
+
   function buildLift() {
     const shafts = { up: $('#shaftUp'), down: $('#shaftDown') };
-    const slots = [];
-    for (let c = 1; c <= 14; c++) { const r = NEW.find(x => x.cabin === c); slots.push(r ? { type: 'rec', rec: r } : { type: c === 7 ? 'seven' : 'empty' }); }
+    const slots = LIFT_SLOTS;
     const ins = {};
     ['up', 'down'].forEach(k => { const d = document.createElement('div'); d.className = 'shaft-in'; shafts[k].appendChild(d); ins[k] = d; });
     const els = slots.map((s, i) => {
@@ -492,14 +524,7 @@
     }
     measure(); st.s = st.pitch * 6.6;
     window.addEventListener('resize', () => { const p = st.s / (st.L || 1); measure(); st.s = p * st.L; });
-    const ro = $$('#readout .ro');
-    function readout(k, i) {
-      const btn = ro[k === 'up' ? 0 : 1], t = $('.ro-text', btn);
-      btn.dataset.slot = i; t.innerHTML = slotText(slots[i], k);
-      btn.setAttribute('aria-label', t.textContent);
-      if (!reduce) gsap.fromTo(t, { yPercent: k === 'up' ? 100 : -100 }, { yPercent: 0, duration: .5, ease: 'power3.out' });
-    }
-    ro.forEach(b => b.addEventListener('click', () => { const i = +b.dataset.slot; if (!isNaN(i)) slotAct(slots[i], null); }));
+    const readout = setReadout;
 
     gsap.ticker.add((t, dtMs) => {
       if (!st.active || !st.H) return;
@@ -585,8 +610,9 @@
     const fm = $('.foot-mark span'); fit(fm, $('.foot-mark'));
     $('#wordmark').style.overflow = 'hidden';
     const land = $('#landing');
-    const stacked = getComputedStyle($('.p-grid')).gridTemplateColumns.trim().split(/s+/).length === 1;
-    if (!stacked) {
+    const stacked = getComputedStyle($('.p-grid')).gridTemplateColumns.trim().split(/\s+/).length === 1;
+    if (sceneOn) land.style.removeProperty('--door-h');
+    else if (!stacked) {
       const grid = $('.p-grid'), top = grid.getBoundingClientRect().top + scrollY();
       const fixed = $('.door-sign').offsetHeight + 8 + $('#readout').offsetHeight + 14 + parseFloat(getComputedStyle(grid).paddingTop) + parseFloat(getComputedStyle($('#p')).paddingBottom) + 8;
       const doorW = $('#shaftUp').clientWidth || 200;
@@ -766,6 +792,7 @@
       $('[data-open]', bz).addEventListener('click', () => openCabin(r, BAZ, $('img', crate.els[crate.cur])));
     }
     if (!reduce) gsap.fromTo(bz.children, { y: 8, opacity: .3 }, { y: 0, opacity: 1, duration: .35, stagger: .02, ease: 'power2.out', overwrite: true });
+    magnetize(bz);
   }
 
   /* ==========================================================================
@@ -939,11 +966,185 @@
   })();
 
   /* ==========================================================================
+     The 3D shaft
+     ========================================================================== */
+  let S = null, sceneOn = false, sceneActive = true;
+  function init3d() {
+    if (reduce || !window.THREE || !window.PaternosterScene || !window.PaternosterScene.supported()) return false;
+    const canvas = $('#scene'), p = $('#p');
+    try {
+      canvas.hidden = false; p.classList.add('is-3d'); p.dataset.tone = 'clear';
+      S = window.PaternosterScene.create(canvas, {
+        mobile: window.innerWidth < 760,
+        slots: LIFT_SLOTS.map(s => ({ cover: s.type === 'rec' ? cover(s.rec) : null, label: s.type === 'seven' ? '7' : null })),
+        isStopped: () => lift.stopped || lift.service,
+        onPassing: (k, i) => setReadout(k, i)
+      });
+    } catch (e) { canvas.hidden = true; p.classList.remove('is-3d'); p.dataset.tone = 'blue'; return false; }
+    let cw = 0, ch = 0;
+    const size = () => { const w = canvas.clientWidth, h = canvas.clientHeight; if (w && h && (w !== cw || h !== ch)) { cw = w; ch = h; S.resize(w, h); } };
+    size(); window.addEventListener('resize', size);
+    S.intro = 1;
+    if ('IntersectionObserver' in window) new IntersectionObserver(es => { sceneActive = es[0].isIntersecting; }).observe(p);
+    const dark = $('#sceneDark');
+    gsap.ticker.add((t, dtMs) => { if (!sceneActive) return; size(); dark.style.opacity = S.frame(Math.min(.05, (dtMs || 16) / 1000), speed.boost).toFixed(3); });
+    let dx = 0, dy = 0, pickT = 0;
+    p.addEventListener('pointermove', e => {
+      if (e.pointerType !== 'mouse') return;
+      const b = canvas.getBoundingClientRect(), x = e.clientX - b.left, y = e.clientY - b.top;
+      S.pointer((x / b.width - .5) * 2, -(y / b.height - .5) * 2);
+      const now = performance.now(); if (now - pickT < 50) return; pickT = now;
+      const i = e.target === canvas ? S.pick(x, y) : -1; S.hover(i);
+      sceneHover = i >= 0;
+      if (i >= 0) { const s = LIFT_SLOTS[i]; cursorLabel(s.type === 'rec' ? 'Step off · ' + s.rec.artist : s.type === 'seven' ? 'Concerts' : 'Empty cabin'); }
+      else if (e.target === canvas) cursorLabel('');
+    });
+    p.addEventListener('pointerleave', () => { S.hover(-1); S.pointer(0, 0); sceneHover = false; cursorLabel(''); });
+    canvas.addEventListener('pointerdown', e => { dx = e.clientX; dy = e.clientY; });
+    canvas.addEventListener('pointerup', e => {
+      if (Math.hypot(e.clientX - dx, e.clientY - dy) > 6) return;
+      const b = canvas.getBoundingClientRect(), i = S.pick(e.clientX - b.left, e.clientY - b.top);
+      if (i < 0) return;
+      Sound.sfx.press();
+      slotAct(LIFT_SLOTS[i], { getBoundingClientRect: () => ({ left: e.clientX - 70, top: e.clientY - 70, width: 140, height: 140 }) });
+    });
+    sceneOn = true;
+    return true;
+  }
+  let heroTl = null, heroP = 0;
+  function heroScrub() {
+    if (!sceneOn || reduce) return;
+    heroTl = gsap.timeline({ paused: true })
+      .fromTo('.wm .ch', { yPercent: 0 }, { yPercent: -118, stagger: .02, ease: 'none', duration: .6 }, 0)
+      .fromTo(['.p-grid', '.scrollcue'], { y: 0, opacity: 1 }, { y: -50, opacity: 0, ease: 'none', duration: .6 }, 0);
+    heroTl.progress(clamp(heroP / .5, 0, 1));
+  }
+
+  /* ---------- amber dot-matrix display ---------- */
+
+  const GLYPH = {
+    A: ['01110', '10001', '10001', '11111', '10001', '10001', '10001'], B: ['11110', '10001', '10001', '11110', '10001', '10001', '11110'],
+    C: ['01110', '10001', '10000', '10000', '10000', '10001', '01110'], D: ['11110', '10001', '10001', '10001', '10001', '10001', '11110'],
+    E: ['11111', '10000', '10000', '11110', '10000', '10000', '11111'], F: ['11111', '10000', '10000', '11110', '10000', '10000', '10000'],
+    G: ['01110', '10001', '10000', '10111', '10001', '10001', '01111'], H: ['10001', '10001', '10001', '11111', '10001', '10001', '10001'],
+    I: ['01110', '00100', '00100', '00100', '00100', '00100', '01110'], J: ['00111', '00010', '00010', '00010', '00010', '10010', '01100'],
+    K: ['10001', '10010', '10100', '11000', '10100', '10010', '10001'], L: ['10000', '10000', '10000', '10000', '10000', '10000', '11111'],
+    M: ['10001', '11011', '10101', '10101', '10001', '10001', '10001'], N: ['10001', '10001', '11001', '10101', '10011', '10001', '10001'],
+    O: ['01110', '10001', '10001', '10001', '10001', '10001', '01110'], P: ['11110', '10001', '10001', '11110', '10000', '10000', '10000'],
+    Q: ['01110', '10001', '10001', '10001', '10101', '10010', '01101'], R: ['11110', '10001', '10001', '11110', '10100', '10010', '10001'],
+    S: ['01111', '10000', '10000', '01110', '00001', '00001', '11110'], T: ['11111', '00100', '00100', '00100', '00100', '00100', '00100'],
+    U: ['10001', '10001', '10001', '10001', '10001', '10001', '01110'], V: ['10001', '10001', '10001', '10001', '10001', '01010', '00100'],
+    W: ['10001', '10001', '10001', '10101', '10101', '10101', '01010'], X: ['10001', '10001', '01010', '00100', '01010', '10001', '10001'],
+    Y: ['10001', '10001', '01010', '00100', '00100', '00100', '00100'], Z: ['11111', '00001', '00010', '00100', '01000', '10000', '11111'],
+    0: ['01110', '10001', '10011', '10101', '11001', '10001', '01110'], 1: ['00100', '01100', '00100', '00100', '00100', '00100', '01110'],
+    2: ['01110', '10001', '00001', '00010', '00100', '01000', '11111'], 3: ['11111', '00010', '00100', '00010', '00001', '10001', '01110'],
+    4: ['00010', '00110', '01010', '10010', '11111', '00010', '00010'], 5: ['11111', '10000', '11110', '00001', '00001', '10001', '01110'],
+    6: ['00110', '01000', '10000', '11110', '10001', '10001', '01110'], 7: ['11111', '00001', '00010', '00100', '01000', '01000', '01000'],
+    8: ['01110', '10001', '10001', '01110', '10001', '10001', '01110'], 9: ['01110', '10001', '10001', '01111', '00001', '00010', '01100'],
+    ' ': ['000', '000', '000', '000', '000', '000', '000'], '-': ['00000', '00000', '00000', '11111', '00000', '00000', '00000'],
+    '—': ['0000000', '0000000', '0000000', '1111111', '0000000', '0000000', '0000000'], ':': ['0', '1', '1', '0', '1', '1', '0'],
+    ',': ['00', '00', '00', '00', '00', '01', '10'], '.': ['0', '0', '0', '0', '0', '1', '1'], '&': ['01100', '10010', '10100', '01000', '10101', '10010', '01101'],
+    '◆': ['00000', '00100', '01110', '11111', '01110', '00100', '00000'], '▲': ['00000', '00100', '01110', '11111', '00000', '00000', '00000'],
+    '/': ['00001', '00010', '00010', '00100', '01000', '01000', '10000'], "'": ['1', '1', '0', '0', '0', '0', '0']
+  };
+  const ACCENT = { 'Á': ['A', 'acute'], 'É': ['E', 'acute'], 'Í': ['I', 'acute'], 'Ó': ['O', 'acute'], 'Ú': ['U', 'acute'], 'Ý': ['Y', 'acute'], 'Č': ['C', 'caron'], 'Ď': ['D', 'caron'], 'Ě': ['E', 'caron'], 'Ň': ['N', 'caron'], 'Ř': ['R', 'caron'], 'Š': ['S', 'caron'], 'Ť': ['T', 'caron'], 'Ž': ['Z', 'caron'], 'Ů': ['U', 'ring'] };
+  const MARK = { acute: [[0, 3], [1, 2]], caron: [[0, 1], [0, 3], [1, 2]], ring: [[0, 2], [1, 1], [1, 3]] };
+  function dotStrip(text) {
+    const cols = [];
+    for (const raw of text) {
+      const ch = raw.toUpperCase(), acc = ACCENT[ch], g = GLYPH[acc ? acc[0] : ch] || GLYPH[' '];
+      const w = g[0].length, block = [];
+      for (let c = 0; c < w; c++) { const col = new Array(10).fill(0); for (let r = 0; r < 7; r++) col[r + 2] = g[r][c] === '1' ? 1 : 0; block.push(col); }
+      if (acc) MARK[acc[1]].forEach(([r, c]) => { if (block[c]) block[c][r] = 1; });
+      block.forEach(col => cols.push(col)); cols.push(new Array(10).fill(0));
+    }
+    return cols;
+  }
+  function initTicker() {
+    const c = $('#ticker'); if (!c) return;
+    const x = c.getContext('2d'), ROWS = 10;
+    const s0 = SESSIONS[0];
+    const text = '   NOW RIDING   ' + NEW.map(r => 'CABIN ' + pad2(r.cabin) + '  ' + r.artist.toUpperCase() + ' — ' + r.title.toUpperCase() + '  ' + r.price + ' CZK').join('   ◆   ') +
+      (s0 ? '   ◆   NEXT CONCERT IN CABIN 7: ' + dayDate(s0.date).toUpperCase() + ', ' + s0.artist.toUpperCase() : '') + '   ◆   WE BUY RECORDS   ◆ ';
+    const strip = dotStrip(text), W = strip.length, bits = new Uint8Array(W * ROWS);
+    strip.forEach((col, cx) => col.forEach((on, r) => { bits[r * W + cx] = on; }));
+    let off = 0, last = -1, vis = false, cell = 1, cols = 0;
+    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    const size = () => { c.width = Math.round(c.clientWidth * dpr); c.height = Math.round(c.clientHeight * dpr); cell = c.height / ROWS; cols = Math.ceil(c.width / cell) + 1; last = -1; };
+    size(); window.addEventListener('resize', size);
+    if ('IntersectionObserver' in window) new IntersectionObserver(es => { vis = es[0].isIntersecting; }).observe(c);
+    function draw(start) {
+      x.fillStyle = '#0d0c0a'; x.fillRect(0, 0, c.width, c.height);
+      const r = cell * .36, onP = new Path2D(), offP = new Path2D();
+      for (let col = 0; col < cols; col++) {
+        const sx = (start + col) % W, cx = col * cell + cell / 2;
+        for (let row = 0; row < ROWS; row++) { const p = bits[row * W + sx] ? onP : offP, cy = row * cell + cell / 2; p.moveTo(cx + r, cy); p.arc(cx, cy, r, 0, 6.2832); }
+      }
+      x.fillStyle = '#251b0d'; x.fill(offP); x.fillStyle = '#ffb547'; x.fill(onP);
+    }
+    gsap.ticker.add((t, dtMs) => {
+      if (!vis) return;
+      if (!reduce) off += ((dtMs || 16) / 1000) * (16 + speed.boost * 16);
+      const start = Math.floor(off) % W; if (start !== last) { last = start; draw(start); }
+    });
+  }
+
+  /* ---------- headline reveals, counting numbers ---------- */
+  function initReveals() {
+    if (reduce || !ST) return;
+    $$('.ftitle').forEach(h => {
+      const words = h.textContent.trim().split(' ');
+      h.setAttribute('aria-label', h.textContent.trim());
+      h.innerHTML = words.map(w => '<span class="w" aria-hidden="true">' + w.split('').map(ch => '<span class="c">' + esc(ch) + '</span>').join('') + '</span>').join(' ');
+    });
+    $$('.fhead').forEach(fh => {
+      gsap.timeline({ scrollTrigger: { trigger: fh, start: 'top 85%', once: true } })
+        .from($$('.c', fh), { yPercent: 118, duration: .95, stagger: .028, ease: 'power4.out' }, 0)
+        .from($('.plate', fh), { rotateX: -100, y: 24, opacity: 0, transformPerspective: 600, duration: 1, ease: 'power3.out' }, 0)
+        .from($('.flede', fh), { y: 18, opacity: 0, duration: .8, ease: 'power3.out' }, .25);
+    });
+    $$('.facts dd').forEach(dd => {
+      const tn = dd.firstChild; if (!tn || tn.nodeType !== 3) return;
+      const m = tn.textContent.match(/^([\d.]+)(\D*)$/); if (!m) return;
+      const target = parseFloat(m[1]), dec = (m[1].split('.')[1] || '').length, suf = m[2], from = target > 1000 ? target - 80 : 0, o = { v: from };
+      tn.textContent = from.toFixed(dec) + suf;
+      ST.create({ trigger: dd, start: 'top 92%', once: true, onEnter: () => gsap.to(o, { v: target, duration: 1.8, ease: 'power3.out', onUpdate: () => { tn.textContent = o.v.toFixed(dec) + suf; } }) });
+    });
+    $$('.inv-row').forEach((row, i) => { gsap.from(row, { y: 30, opacity: 0, duration: .7, ease: 'power3.out', delay: (i % 6) * .04, scrollTrigger: { trigger: row, start: 'top 95%', once: true } }); });
+  }
+
+  /* ---------- footer letters ride like cabins ---------- */
+  function initFooter() {
+    const fm = $('.foot-mark span'), txt = fm.textContent;
+    fm.innerHTML = txt.split('').map(ch => '<span class="ch"><span class="in"><i>' + ch + '</i><i>' + ch + '</i></span></span>').join('');
+    const ins = $$('.in', fm); ins.forEach((el, i) => gsap.set(el, { yPercent: i % 2 ? -50 : 0 }));
+    let tw = [];
+    const foot = $('.foot-mark');
+    foot.addEventListener('pointerenter', () => {
+      if (reduce) return; tw.forEach(t => t.kill());
+      tw = ins.map((el, i) => i % 2 ? gsap.fromTo(el, { yPercent: -50 }, { yPercent: 0, duration: .75, ease: 'power2.inOut', repeat: -1, repeatDelay: .2, delay: i * .035 })
+        : gsap.fromTo(el, { yPercent: 0 }, { yPercent: -50, duration: .75, ease: 'power2.inOut', repeat: -1, repeatDelay: .2, delay: i * .035 }));
+    });
+    foot.addEventListener('pointerleave', () => { tw.forEach(t => t.kill()); tw = []; ins.forEach((el, i) => gsap.to(el, { yPercent: i % 2 ? -50 : 0, duration: .5, ease: 'power3.out' })); });
+  }
+
+  /* ---------- the floor rail: ground at the bottom, like the building ---------- */
+  function initRail() {
+    const rail = $('#rail'); if (!rail) return;
+    const ticks = FLOORS.map(f => { const b = document.createElement('button'); b.type = 'button'; b.className = 'rail-tick'; b.dataset.floorLink = f; b.setAttribute('aria-label', 'Ride to ' + FLOOR_NAME[f]); b.innerHTML = '<span>' + f + '</span>'; rail.appendChild(b); return b; });
+    const place = () => { const H = document.documentElement.scrollHeight - window.innerHeight; ticks.forEach((b, i) => { const y = i === 0 ? 0 : Math.max(0, $(FLOOR_EL[FLOORS[i]]).getBoundingClientRect().top + scrollY()); b.style.top = ((1 - Math.min(1, y / Math.max(1, H))) * 100).toFixed(2) + '%'; }); };
+    place(); if (ST) ST.addEventListener('refresh', place); window.addEventListener('resize', place);
+    const cab = $('#railCab');
+    gsap.ticker.add(() => { const H = document.documentElement.scrollHeight - window.innerHeight, p = H > 0 ? scrollY() / H : 0; cab.style.transform = 'translate3d(0,' + ((1 - p) * rail.clientHeight).toFixed(1) + 'px,0)'; });
+  }
+
+  /* ==========================================================================
      Scroll choreography
      ========================================================================== */
   let wrapping = false, booted = false;
   function setupScroll() {
     if (!ST) return;
+    if (sceneOn) ST.create({ trigger: '#p', start: 'top top', end: () => '+=' + Math.round(window.innerHeight * 1.4), pin: true, invalidateOnRefresh: true, onUpdate: self => { heroP = self.progress; if (S) S.progress = self.progress; if (heroTl) heroTl.progress(clamp(heroP / .5, 0, 1)); } });
     ST.create({ trigger: '#lap', start: 'top top+=' + $('#hud').offsetHeight, end: () => '+=' + Math.round(window.innerHeight * 2.6), pin: true, invalidateOnRefresh: true, onUpdate: self => { lapState.target = self.progress * LAP; } });
     FLOORS.forEach(f => { const el = $(FLOOR_EL[f]); ST.create({ trigger: el, start: 'top 40%', end: 'bottom 40%', onToggle: self => { if (self.isActive) setFloor(f, el.dataset.tone); } }); });
     ST.create({ trigger: '#over', start: 'top 40%', end: 'bottom bottom', onToggle: self => { if (self.isActive) setFloor('5', 'ink'); } });
@@ -983,20 +1184,33 @@
     } catch (e) { /* system fonts */ }
     const all = NEW.concat(BAZ);
     for (let i = 0; i < all.length; i++) { cover(all[i]); if (i % 4 === 3) await new Promise(r => setTimeout(r, 0)); }
-    fitAll(); buildLift(); buildInventory(); buildCrate(); buildMini(); syncHolds();
-    fitAll(); buildCallStrip(); crateLayout(); setupScroll();
+    initFooter();
+    const has3d = init3d();
+    fitAll(); if (!has3d) buildLift(); buildInventory(); buildCrate(); buildMini(); syncHolds();
+    fitAll(); buildCallStrip(); crateLayout(); setupScroll(); initTicker(); initReveals(); initRail(); magnetize();
     await new Promise(r => setTimeout(r, Math.max(0, (reduce ? 0 : 1300) - (performance.now() - t0))));
     clearInterval(tick); $('#loaderFloor').textContent = 'P';
-    await new Promise(r => setTimeout(r, reduce ? 0 : 250));
+    // the entry gate: sound or silence
+    $('#loaderLine').textContent = 'The lift is here';
+    const gate = $('#loaderEnter'); gate.hidden = false;
+    gsap.fromTo(gate.children, { y: 16, opacity: 0 }, { y: 0, opacity: 1, duration: .6, stagger: .08, ease: 'power3.out' });
+    $('button', gate).focus({ preventScroll: true });
+    const choice = await new Promise(res => gate.addEventListener('click', e => { const b = e.target.closest('[data-enter]'); if (b) res(b.dataset.enter); }));
+    if (choice === 'sound') setSound(true, true);
     lift.booting = false;
     let done = false;
     const fin = () => { if (done) return; done = true; loader.remove(); booted = true; if (ST) ST.refresh(); syncFloor(); };
-    gsap.to(loader, { yPercent: -100, duration: reduce ? 0 : .9, ease: 'power3.inOut', onComplete: fin });
-    setTimeout(fin, 1500);
+    gsap.to(loader, { yPercent: -100, duration: reduce ? 0 : 1, ease: 'power4.inOut', onComplete: fin });
+    setTimeout(fin, 1600);
+    if (sceneOn) {
+      lock(true);
+      gsap.to(S, { intro: 0, duration: 2.8, ease: 'power3.inOut', delay: .15 });
+      setTimeout(() => { lock(false); heroScrub(); }, 2900);
+    }
     if (!reduce) {
-      gsap.from('.wm .ch', { yPercent: 100, duration: 1, stagger: .03, ease: 'power4.out', delay: .35 });
-      gsap.from(['.p-thesis', '.p-lede', '.status', '.p-plate'], { y: 24, opacity: 0, duration: .8, stagger: .06, ease: 'power3.out', delay: .6 });
-      gsap.from('.landing', { y: 40, opacity: 0, duration: .9, ease: 'power3.out', delay: .55 });
+      const d = sceneOn ? 1.5 : .35;
+      gsap.from('.wm .ch', { yPercent: 100, duration: 1.1, stagger: .035, ease: 'power4.out', delay: d });
+      gsap.from(['.p-thesis', '.p-lede', '.status', '.p-plate', '.landing', '.scrollcue'], { y: 30, opacity: 0, duration: .9, stagger: .07, ease: 'power3.out', delay: d + .35 });
     }
     const hash = location.hash.replace('#', ''), f = Object.keys(FLOOR_EL).find(x => FLOOR_EL[x] === '#' + hash);
     if (f && f !== 'P') setTimeout(() => travelTo(f), reduce ? 0 : 1200);

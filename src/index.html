@@ -21,7 +21,11 @@
 <div class="loader" id="loader" aria-hidden="true">
   <svg class="mark mark--big" viewBox="0 0 28 44"><use href="#loop"/><rect class="cab-a" width="8" height="9" rx="1"/><rect class="cab-b" width="8" height="9" rx="1"/></svg>
   <p class="loader-floor" id="loaderFloor">5</p>
-  <p class="loader-line mono">Calling the lift</p>
+  <p class="loader-line mono" id="loaderLine">Calling the lift</p>
+  <div class="loader-enter" id="loaderEnter" hidden>
+    <button type="button" class="enter enter--sound" data-enter="sound"><span class="enter-led" aria-hidden="true"></span>Enter with sound</button>
+    <button type="button" class="enter" data-enter="quiet">Enter quietly</button>
+  </div>
 </div>
 
 <!-- HUD -->
@@ -45,6 +49,10 @@
 
 <!-- P -->
 <section class="floor floor-p" id="p" data-floor="P" data-tone="blue">
+  <canvas class="scene" id="scene" aria-label="A paternoster lift: oak cabins riding past two openings in a blue enamel wall" role="img" hidden></canvas>
+  <div class="scene-shade" aria-hidden="true"></div>
+  <div class="scene-dark" id="sceneDark" aria-hidden="true"></div>
+  <p class="scrollcue mono" aria-hidden="true"><span class="cue-track"><span class="cue-cab"></span></span>Scroll to ride</p>
   <h1 class="wordmark" id="wordmark"><span class="sr">Paternoster, a record shop in Prague</span><span class="wm" aria-hidden="true">Paternoster</span></h1>
   <div class="p-grid">
     <div class="p-copy">
@@ -79,7 +87,7 @@
   </div>
 </section>
 
-<div class="slab"><span class="slab-num">1</span><span class="slab-rule"></span><span class="slab-lv mono">+4.20 m</span></div>
+<div class="ticker" aria-hidden="true"><canvas id="ticker"></canvas></div>
 
 <!-- 1 -->
 <section class="floor floor-1" id="f1" data-floor="1" data-tone="white">
@@ -231,7 +239,7 @@
     <figure class="wheel"><canvas id="wheel" width="800" height="800" aria-hidden="true"></canvas><figcaption class="mono">Top wheel, 1931</figcaption></figure>
   </div>
   <footer class="foot">
-    <p class="foot-mark" aria-hidden="true"><span>Paternoster</span></p>
+    <p class="foot-mark" aria-hidden="true" data-chip="Ride"><span>Paternoster</span></p>
     <p class="mono foot-line">A fictional shop. Every artist and record is invented. Portfolio concept, 2026.</p>
   </footer>
 </section>
@@ -324,9 +332,11 @@
 
 <div class="travel" id="travel" aria-hidden="true"><div class="travel-slab"><span class="plate plate--travel"><b id="travelNum">1</b></span></div></div>
 <div class="toast mono" id="toast" role="status" aria-live="polite"></div>
-<div class="chip mono" id="chip" aria-hidden="true"></div>
+<div class="cursor" id="cursor" aria-hidden="true"><span class="cursor-ring"></span><span class="cursor-label mono" id="cursorLabel"></span></div>
+<nav class="rail" id="rail" aria-label="Floors"><span class="rail-track"></span><span class="rail-cab" id="railCab"></span></nav>
 <div class="grain" aria-hidden="true"></div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
 <script src="https://unpkg.com/lenis@1.1.13/dist/lenis.min.js"></script>

@@ -3,7 +3,7 @@
 //   artifact.html    - the same page without the document shell (Claude artifact)
 import fs from 'node:fs';
 const src = f => fs.readFileSync(new URL('./src/' + f, import.meta.url), 'utf8');
-const js = ['data.js', 'covers.js', 'audio.js', 'main.js'].map(src).join('\n');
+const js = ['data.js', 'covers.js', 'audio.js', 'scene.js', 'main.js'].map(src).join('\n');
 const body = src('index.html')
   .replace('<!-- @css -->', () => '<style>\n' + src('site.css') + '\n</style>')
   .replace('<!-- @js -->', () => '<script>\n' + js + '\n</script>');
