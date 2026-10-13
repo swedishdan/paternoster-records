@@ -1,5 +1,9 @@
 <title>Paternoster Records</title>
 <meta name="description" content="Paternoster: a Prague record shop on a lift that never stops.">
+<meta property="og:title" content="Paternoster Records">
+<meta property="og:description" content="A Prague record shop on a lift that never stops.">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=IBM+Plex+Mono:wght@400;500&family=Newsreader:ital,wght@1,300..500&display=swap">
@@ -36,25 +40,6 @@
     <button class="pill-btn pill-btn--menu" id="floorsBtn" type="button" aria-haspopup="dialog" aria-controls="directory"><span class="mono">Floors</span><span class="burger" aria-hidden="true"><i></i><i></i></span></button>
   </nav>
 </header>
-
-<!-- FLOOR DIRECTORY -->
-<div class="directory" id="directory" role="dialog" aria-modal="true" aria-labelledby="dirTitle" hidden>
-  <div class="dir-board">
-    <div class="dir-head">
-      <h2 id="dirTitle">Floors</h2>
-      <button class="round-btn" type="button" id="dirClose" aria-label="Close"><span aria-hidden="true">×</span></button>
-    </div>
-    <ol class="dir-list" id="dirList">
-      <li><a href="#f5" data-floor-link="5"><span class="plate plate--md"><b>5</b></span><span class="dir-name">Visit</span><span class="dir-desc">Address, hours, post</span><span class="dir-btn" aria-hidden="true"></span></a></li>
-      <li><a href="#f4" data-floor-link="4"><span class="plate plate--md"><b>4</b></span><span class="dir-name">Cabin 7</span><span class="dir-desc">Concerts in the lift</span><span class="dir-btn" aria-hidden="true"></span></a></li>
-      <li><a href="#f3" data-floor-link="3"><span class="plate plate--md"><b>3</b></span><span class="dir-name">The lap</span><span class="dir-desc">3 min 52 around the building</span><span class="dir-btn" aria-hidden="true"></span></a></li>
-      <li><a href="#f2" data-floor-link="2"><span class="plate plate--md"><b>2</b></span><span class="dir-name">Second-hand</span><span class="dir-desc">The crates</span><span class="dir-btn" aria-hidden="true"></span></a></li>
-      <li><a href="#f1" data-floor-link="1"><span class="plate plate--md"><b>1</b></span><span class="dir-name">New in</span><span class="dir-desc">This week’s records</span><span class="dir-btn" aria-hidden="true"></span></a></li>
-      <li><a href="#p" data-floor-link="P"><span class="plate plate--md"><b>P</b></span><span class="dir-name">Ground</span><span class="dir-desc">Step on here</span><span class="dir-btn" aria-hidden="true"></span></a></li>
-    </ol>
-    <p class="dir-foot mono">Tip: press P or 1–5 anywhere.</p>
-  </div>
-</div>
 
 <main id="main">
 
@@ -147,7 +132,7 @@
       <div class="tabs" id="crateTabs" role="group" aria-label="Sections"></div>
       <div class="crate" id="crate" tabindex="0" role="group" aria-roledescription="record crate" aria-label="Record crate. Use the arrow keys to flip." data-chip="Drag to flip">
         <div class="crate-stack" id="stack"></div>
-        <div class="crate-front"><svg class="mark" viewBox="0 0 28 44" aria-hidden="true"><use href="#loop"/></svg><span class="crate-word">Paternoster</span></div>
+        <div class="crate-front" aria-hidden="true"><svg class="mark" viewBox="0 0 28 44" aria-hidden="true"><use href="#loop"/></svg><span class="crate-word">Paternoster</span></div>
       </div>
       <div class="crate-ctrl">
         <button type="button" class="round-btn" id="cratePrev" aria-label="Previous record">↑</button>
@@ -265,6 +250,25 @@
 </section>
 
 </main>
+
+<!-- FLOOR DIRECTORY -->
+<div class="directory" id="directory" role="dialog" aria-modal="true" aria-labelledby="dirTitle" hidden>
+  <div class="dir-board">
+    <div class="dir-head">
+      <h2 id="dirTitle">Floors</h2>
+      <button class="round-btn" type="button" id="dirClose" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <ol class="dir-list" id="dirList">
+      <li><a href="#f5" data-floor-link="5"><span class="plate plate--md"><b>5</b></span><span class="dir-name">Visit</span><span class="dir-desc">Address, hours, post</span><span class="dir-btn" aria-hidden="true"></span></a></li>
+      <li><a href="#f4" data-floor-link="4"><span class="plate plate--md"><b>4</b></span><span class="dir-name">Cabin 7</span><span class="dir-desc">Concerts in the lift</span><span class="dir-btn" aria-hidden="true"></span></a></li>
+      <li><a href="#f3" data-floor-link="3"><span class="plate plate--md"><b>3</b></span><span class="dir-name">The lap</span><span class="dir-desc">3 min 52 around the building</span><span class="dir-btn" aria-hidden="true"></span></a></li>
+      <li><a href="#f2" data-floor-link="2"><span class="plate plate--md"><b>2</b></span><span class="dir-name">Second-hand</span><span class="dir-desc">The crates</span><span class="dir-btn" aria-hidden="true"></span></a></li>
+      <li><a href="#f1" data-floor-link="1"><span class="plate plate--md"><b>1</b></span><span class="dir-name">New in</span><span class="dir-desc">This week’s records</span><span class="dir-btn" aria-hidden="true"></span></a></li>
+      <li><a href="#p" data-floor-link="P"><span class="plate plate--md"><b>P</b></span><span class="dir-name">Ground</span><span class="dir-desc">Step on here</span><span class="dir-btn" aria-hidden="true"></span></a></li>
+    </ol>
+    <p class="dir-foot mono">Tip: press P or 1–5 anywhere.</p>
+  </div>
+</div>
 
 <!-- RECORD VIEW -->
 <div class="cv" id="cv" role="dialog" aria-modal="true" aria-labelledby="cvArtist" hidden>

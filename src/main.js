@@ -85,7 +85,7 @@
     } catch (e) { lenis = null; }
   }
   const scrollY = () => window.scrollY || document.documentElement.scrollTop;
-  function jump(y) { if (lenis) lenis.scrollTo(y, { immediate: true, force: true }); else window.scrollTo(0, y); }
+  function jump(y) { if (lenis) lenis.scrollTo(y, { immediate: true, force: true }); window.scrollTo(0, y); }
   let locks = 0;
   function lock(on) {
     locks = Math.max(0, locks + (on ? 1 : -1));
@@ -343,10 +343,11 @@
     const n = cv.list.length; if (n < 2) return;
     const ni = ((cv.i + step) % n + n) % n, dir = step > 0 ? 1 : -1; cv.i = ni;
     stopPlay(true);
-    gsap.timeline()
-      .to(['.cv-media', '.cv-info'], { y: -50 * dir, opacity: 0, duration: .25, ease: 'power2.in' })
-      .add(() => { fillCabin(cv.list[ni]); Sound.sfx.clunk(); })
-      .fromTo(['.cv-media', '.cv-info'], { y: 50 * dir, opacity: 0 }, { y: 0, opacity: 1, duration: .45, ease: 'power3.out', stagger: .04 });
+    gsap.to(['.cv-media', '.cv-info'], { y: -50 * dir, opacity: 0, duration: .25, ease: 'power2.in', overwrite: true });
+    setTimeout(() => {
+      fillCabin(cv.list[ni]); Sound.sfx.clunk();
+      gsap.fromTo(['.cv-media', '.cv-info'], { y: 50 * dir, opacity: 0 }, { y: 0, opacity: 1, duration: .45, ease: 'power3.out', stagger: .04, overwrite: true });
+    }, 260);
   }
   $('#cvClose').addEventListener('click', closeCabin);
   $('#cvPrev').addEventListener('click', () => swapCabin(-1));
@@ -381,16 +382,14 @@
     const goingUp = b >= a, travel = $('#travel'), slab = $('.travel-slab'), num = $('#travelNum');
     num.textContent = floorNow; travel.style.visibility = 'visible';
     const steps = []; for (let i = a; goingUp ? i <= b : i >= b; i += goingUp ? 1 : -1) steps.push(FLOORS[i]);
-    const enter = goingUp ? -110 : 110;
-    let finished = false;
-    const fin = () => { if (finished) return; finished = true; travel.style.visibility = 'hidden'; traveling = false; lock(false); };
-    gsap.timeline({ onComplete: fin })
-      .fromTo(slab, { yPercent: enter }, { yPercent: 0, duration: .45, ease: 'power2.in' })
-      .add(() => { jump(y); steps.slice(1).forEach((s, i) => gsap.delayedCall(i * .12, () => { num.textContent = s; Sound.sfx.tick(); })); })
-      .to({}, { duration: Math.max(.2, (steps.length - 1) * .12) })
-      .add(() => setFloor(f, target.dataset.tone))
-      .to(slab, { yPercent: -enter, duration: .55, ease: 'power2.out' });
-    setTimeout(fin, 2600);
+    const enter = goingUp ? -110 : 110, hold = Math.max(200, (steps.length - 1) * 120);
+    let finished = false, jumped = false;
+    const doJump = () => { if (jumped) return; jumped = true; jump(y); steps.slice(1).forEach((s, i) => setTimeout(() => { num.textContent = s; Sound.sfx.tick(); }, i * 120)); };
+    const fin = () => { if (finished) return; finished = true; doJump(); setFloor(f, target.dataset.tone); travel.style.visibility = 'hidden'; traveling = false; lock(false); };
+    gsap.fromTo(slab, { yPercent: enter }, { yPercent: 0, duration: .45, ease: 'power2.in' });
+    setTimeout(doJump, 460);
+    setTimeout(() => { setFloor(f, target.dataset.tone); gsap.to(slab, { yPercent: -enter, duration: .55, ease: 'power2.out', onComplete: fin }); }, 460 + hold);
+    setTimeout(fin, 460 + hold + 900);
   }
   document.addEventListener('click', e => {
     const a = e.target.closest('[data-floor-link]'); if (!a) return;
@@ -586,10 +585,12 @@
     const fm = $('.foot-mark span'); fit(fm, $('.foot-mark'));
     $('#wordmark').style.overflow = 'hidden';
     const land = $('#landing');
-    if (window.innerWidth > 760) {
+    const stacked = getComputedStyle($('.p-grid')).gridTemplateColumns.trim().split(/s+/).length === 1;
+    if (!stacked) {
       const grid = $('.p-grid'), top = grid.getBoundingClientRect().top + scrollY();
       const fixed = $('.door-sign').offsetHeight + 8 + $('#readout').offsetHeight + 14 + parseFloat(getComputedStyle(grid).paddingTop) + parseFloat(getComputedStyle($('#p')).paddingBottom) + 8;
-      land.style.setProperty('--door-h', clamp(window.innerHeight - top - fixed, 260, 600) + 'px');
+      const doorW = $('#shaftUp').clientWidth || 200;
+      land.style.setProperty('--door-h', clamp(Math.min(window.innerHeight - top - fixed, doorW * 1.75), 260, 600) + 'px');
     } else land.style.removeProperty('--door-h');
   }
   function syncFloor() {
@@ -783,8 +784,8 @@
   const STOPS = [
     [0, 'Step on. Mind the gap.'], [14, 'New records. Twelve this week.'], [28, 'The crates. You can smell the cardboard.'],
     [42, 'The office. Someone’s on the phone.'], [56, 'The queue for cabin 7.'], [70, 'Top floor. The hum gets louder.'],
-    [84, 'Over the top. It’s safe. Since 1931.'], [130, 'Every floor again, going down.'], [186, 'The cellar. 38,000 records waiting.'],
-    [202, 'Under the cellar. The quiet part.'], [231, 'Back where you started.']
+    [76, 'Over the top. It’s safe. Since 1931.'], [102, 'Going down. Every floor again.'], [186, 'The cellar. 38,000 records waiting.'],
+    [196, 'Under the cellar. The quiet part.'], [218, 'Coming back up.'], [231, 'Back where you started.']
   ];
   const LAP_NAME = { S: 'Cellar', P: 'Ground', 1: 'New in', 2: 'Second-hand', 3: 'Office', 4: 'Cabin 7', 5: 'Top floor' };
   (function drawLap() {
@@ -807,7 +808,11 @@
     let where;
     if (p.dir === 'top') where = 'Over the top';
     else if (p.dir === 'bottom') where = 'Under the cellar';
-    else { const f = Object.keys(LV).reduce((a, k) => Math.abs(LV[k] - p.y) < Math.abs(LV[a] - p.y) ? k : a, 'P'); where = LAP_NAME[f] + ' · ' + p.dir; }
+    else {
+      const tt = ((t % LAP) + LAP) % LAP;
+      const f = tt < 70 ? ['P', '1', '2', '3', '4', '5'][Math.floor(tt / 14)] : tt < 186 ? ['5', '4', '3', '2', '1', 'P'][Math.min(5, Math.floor((tt - 102) / 14))] : tt < 218 ? 'S' : (tt < 231 ? 'S' : 'P');
+      where = LAP_NAME[f] + ' · ' + p.dir;
+    }
     $('#lapWhere').textContent = where;
     let si = 0; STOPS.forEach((s, i) => { if (t >= s[0] - .5) si = i; });
     if (si !== lapState.stop) {
@@ -927,7 +932,7 @@
       x.beginPath(); x.arc(0, 0, R * .22, 0, Math.PI * 2); x.fill();
       x.beginPath(); x.arc(0, 0, R * .1, 0, Math.PI * 2); x.fillStyle = '#1F45A8'; x.fill();
       x.restore();
-      x.fillStyle = '#D7362B'; x.beginPath(); x.moveTo(cx, cy - R - S * .07); x.lineTo(cx - S * .014, cy - R - S * .1); x.lineTo(cx + S * .014, cy - R - S * .1); x.closePath(); x.fill();
+      x.fillStyle = '#C42F26'; x.beginPath(); x.moveTo(cx, cy - R - S * .07); x.lineTo(cx - S * .014, cy - R - S * .1); x.lineTo(cx + S * .014, cy - R - S * .1); x.closePath(); x.fill();
     }
     draw();
     gsap.ticker.add((t, dtMs) => { if (!vis) return; if (!lift.stopped && !reduce) ang += ((dtMs || 16) / 1000) * .12 * (1 + speed.boost); draw(); });
@@ -956,14 +961,10 @@
     num.textContent = '5'; travel.style.visibility = 'visible'; Sound.sfx.clunk();
     let finished = false;
     const fin = () => { if (finished) return; finished = true; travel.style.visibility = 'hidden'; gsap.set(slab, { xPercent: 0, yPercent: 0 }); lock(false); setTimeout(() => { wrapping = false; }, 600); };
-    gsap.timeline({ onComplete: fin })
-      .fromTo(slab, { xPercent: 100, yPercent: 0 }, { xPercent: 0, duration: .6, ease: 'power3.in' })
-      .add(() => { jump(0); ['4', '3', '2', '1', 'P'].forEach((s, i) => setTimeout(() => { num.textContent = s; Sound.sfx.tick(); }, 90 + i * 100)); })
-      .to({}, { duration: .7 })
-      .add(() => setFloor('P', 'blue'))
-      .to(slab, { xPercent: -100, duration: .6, ease: 'power3.out' })
-      .add(() => toast('Lap ' + laps + '. Welcome back to the ground floor.', 3200));
-    setTimeout(fin, 3000);
+    gsap.fromTo(slab, { xPercent: 100, yPercent: 0 }, { xPercent: 0, duration: .6, ease: 'power3.in' });
+    setTimeout(() => { jump(0); ['4', '3', '2', '1', 'P'].forEach((s, i) => setTimeout(() => { num.textContent = s; Sound.sfx.tick(); }, 90 + i * 100)); }, 620);
+    setTimeout(() => { setFloor('P', 'blue'); gsap.to(slab, { xPercent: -100, duration: .6, ease: 'power3.out', onComplete: fin }); toast('Lap ' + laps + '. Welcome back to the ground floor.', 3200); }, 1350);
+    setTimeout(fin, 2400);
   }
 
   /* ==========================================================================
